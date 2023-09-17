@@ -1,0 +1,69 @@
+body{
+    background-color: rgba(253, 251, 250, 0.842);
+    line-height: 1.5;
+    box-sizing: content-box;
+}
+
+.container {
+    height: 300px;
+    width: 300px;
+    background-color: aliceblue;
+    margin: auto;
+    padding: 50px;
+    margin-top: 25px;
+}
+
+.container .form input {
+    width: 300px;
+    height: 20px;
+    padding: 0 0 0;
+    margin: 15px 0 10px;
+    border-radius: 10px;
+}
+
+.container .form{
+    margin-top: 20px;
+}
+
+h1{
+    font-style: italic;
+    /* font-size: medium; */
+    color: rgb(224, 30, 30);
+}
+
+.adjust{
+    padding-bottom: 15px 0 0 0;
+}
+
+button {
+    /* color: orangered; */
+    width: 100px;
+    background-color: rgb(62, 216, 24);
+    height: 30px;
+    margin-top: 10px;
+    border-radius: 10px;
+    border-color: greenyellow;
+}
+
+.sidebar{
+    background: rgb(5, 68, 104);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 225px;
+    height: 100%;
+    padding: 20px 0;
+    transition: all 0.5s ease;
+}
+
+#loginBox #login{
+    margin: auto;
+    padding-left: 300px;
+    align-self: center;
+}
+
+
+#chatBox #messages{
+   /* width: 300px ; */
+   margin-left: 225px;
+}

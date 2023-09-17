@@ -1,0 +1,195 @@
+    window.scrollTo(0, document.body.scrollHeight);
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+      #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; margin-left: 14rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); width: 81rem;}
+      #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem;}
+      #input:focus { outline: none; }
+      #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages > li { padding: 0.5rem 1rem; }
+      #messages > li:nth-child(odd) { background: #efefef; }
+      #chatBox {
+        display: inline;
+      }
+
+      #online-user, #allusers{
+        color: cornsilk;
+      }
+      #typing {
+        position: absolute;
+        color: #000;
+        bottom: 70px;
+        left: 35%;
+      }
+
+      h1{
+        margin-left: 10px;
+      }
+      h5{
+        color: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+        margin-left: 10px;
+      }
+    </style>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+     <!-- <div class="wrapper"> -->
+      <div class="sidebar">
+        <div id="users">
+          <h5>Your Name: <%= name %></h5>
+          <h1>Users</h1>
+          <ul id="allusers"></ul>
+        </div>
+        <div id="online-user">
+          <h1>Online</h1>
+          <ul id="onlineUsers"></ul>
+        </div>
+      </div>
+     <div id="chatBox"> 
+        <ul id="messages">
+        </ul>
+        <span id="typing"></span>
+        <form id="form" action="">
+          <input id="input" autocomplete="off" />
+          <button>Send</button>
+        </form>
+      </div>
+
+    <!-- <form action="">
+      <input type="text">
+      <button>Send</button>
+    </form> -->
+
+     <!-- <div id="loginBox">
+
+      <form id="login" method="">
+        <input id="username" autocomplete="off" placeholder="Enter your username" />
+        <button type="submit">Login</button>
+      </form>
+
+    </div> -->
+  <!-- </div> -->
+    <script src="/socket.io/socket.io.js"></script>
+<script>
+
+// document.querySelector('#login').addEventListener('submit', function(e) {
+//   e.preventDefault();
+//   username = document.querySelector('#username').value;
+//   if(username) {
+//     document.querySelector('#loginBox').style.display = 'none';
+//     document.querySelector('#chatBox').style.display = 'block';
+
+//   }
+// });
+
+//Fetching our data from database
+fetch('/getUsers').then(async(data) => {
+  const resp = await data.json();
+  let user_list = '';
+  if(resp.success) {
+    resp.data.map(user => {
+       user_list += '<li>'+user.username+'</li>';
+    })
+
+    //display users on the Dom
+    document.querySelector('#allusers').innerHTML = user_list;
+  }
+  initiateChat(username);
+}).catch(err => {
+  console.log(err)
+})
+
+// fetch('/getMsg').then(async (data) => {
+//   const resp = await data.json();
+//   let msgList = '';
+//   if(resp.success) {
+//     resp.data.map(msg => {
+//       msgList += '<li>'+msg.text+'</li>';
+//     })
+//     document.querySelector('#msgs').innerHTML = msgList;
+//   }
+// }).catch(err => {
+//   console.log(err)
+// })
+
+const username = '<%= username %>';
+
+function initiateChat(username) {
+
+    var socket = io({
+      auth: {
+        token: username
+      }
+    });
+
+
+    // get online users
+    socket.on('online:users', (users) => {
+      console.log(users);
+      let online_list = '';
+      users.map(user => {
+        online_list += '<li>'+user+'</li>';
+      })
+      document.querySelector('#onlineUsers').innerHTML = online_list;
+    })
+
+    
+
+    const typing = document.querySelector('#typing');
+    var form = document.getElementById('form');
+    var input = document.getElementById('input');
+
+  function offTyping() {
+    socket.emit('off:typing', username);
+  }
+
+  input.addEventListener('blur', function(e) {
+    e.preventDefault();
+    offTyping();
+  })
+
+  input.addEventListener('keyup', function(e) {
+    e.preventDefault();
+    console.log('key up')
+    socket.emit('on:typing', username);
+  })
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (input.value) {
+      socket.emit('message', { username, msg: input.value } );
+      offTyping();
+      input.value = '';
+    }
+  });
+
+
+
+
+  socket.on('chat:message', function(data) {
+    var item = document.createElement('li');
+    item.innerHTML = `<p> ${data.username}: ${data.msg} </p>`;
+    messages.appendChild(item);
+  });
+  
+  socket.on('on:typing', function(name) {
+    if(name !== username) {
+      typing.textContent = `${name} is typing`;
+    }
+  });
+
+  socket.on('off:typing', function(name) {
+    typing.textContent = '';
+  });
+}
+
+    </script>
+  </body>
+</html>
